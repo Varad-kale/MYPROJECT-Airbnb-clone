@@ -7,11 +7,15 @@ const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
 const session = require("express-session");
 const flash = require("connect-flash");
+const passport = require("passport");
+const LocalStrategy = require("passport-local");
+const User = require("./models/user.js");
 
 
-const listings = require("./routes/listing.js");
-const reviews = require("./routes/review.js");
 
+const listingRouter = require("./routes/listing.js");
+const reviewRouter = require("./routes/review.js");
+const userRouter = require("./routes/user.js");
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
@@ -40,17 +44,36 @@ app.get("/", (req, res) => {
 app.use(session(sessionOptions));
 app.use(flash());
 
+app.use(passport.initialize()); // to initialize the session
+app.use(passport.session()); // for identifying users to authenticate as they browse from page to page 
+
+passport.use(new LocalStrategy(User.authenticate())); //It is used as route middleware to authenticate requests
+
+passport.serializeUser(User.serializeUser()); // for getting logged in for that particular session
+passport.deserializeUser(User.deserializeUser()); // for getting out of that session 
+
 
 app.use((req ,res ,next ) => {
     res.locals.success = req.flash("success");
     res.locals.error = req.flash("error");
+    res.locals.currUser = req.user;
     // console.log(res.locals.success);
     next();
 });
 
+// app.get("/demouser", async (req,res) => {
+//    let fakeUser = new User({
+//      email: "student@gmail.com",
+//      username : "delta-student" // can write username because of passport local mongoose package 
+//    });
 
-app.use("/listings", listings );
-app.use("/listings/:id/reviews", reviews );
+//    let registeredUser = await User.register(fakeUser, "helloworld");
+//    res.send(registeredUser);
+// });
+
+app.use("/listings", listingRouter );
+app.use("/listings/:id/reviews", reviewRouter );
+app.use("/", userRouter);
 
 
 const MONGO_URL = "mongodb://127.0.0.1:27017/WanderGo";

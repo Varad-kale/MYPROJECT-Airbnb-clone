@@ -4,18 +4,7 @@ const wrapAsync = require("../utils/wrapAsync.js")
 const ExpressError = require("../utils/ExpressError.js");
 const { listingSchema, reviewSchema } = require("../schema.js");
 const Listing = require("../models/listing.js");
-
-
-const validateListing = (req, res, next) => {
-    let { error } = listingSchema.validate(req.body);
-
-    if (error) {
-        let errMsg = error.details.map((el) => el.message).join(",");
-        throw new ExpressError(400, error); //errMsg
-    } else {
-        next();
-    }
-}
+const {isLoggedIn, isOwner, validateListing} = require("../middleware.js");
 
 
 //Index route
@@ -29,7 +18,7 @@ router.get("/", async (req, res, next) => {
 })
 
 //new route
-router.get("/new", (req, res) => {
+router.get("/new", isLoggedIn, (req, res) => {
     res.render("listings/new.ejs")
 });
 
@@ -37,21 +26,21 @@ router.get("/new", (req, res) => {
 router.get("/:id", async (req, res, next) => {
     try {
         let { id } = req.params;
-        const listing = await Listing.findById(id).populate("reviews");
+        const listing = await Listing.findById(id).populate("reviews").populate("owner");
         if(!listing){
             req.flash("error", "Listing you requested does not exist !");
             res.redirect("/listings");
         }
+        console.log(listing);
         res.render("listings/show.ejs", { listing });
 
     } catch (err) {
         next(err);
     }
-
 });
 
 //Create Route 
-router.post("/", validateListing, async (req, res, next ) => { // async function because whenever there is a change use async functions
+router.post("/", validateListing,isLoggedIn, async (req, res, next ) => { // async function because whenever there is a change use async functions
     try {
         // let listing = req.body.listing;
         // let result = listingSchema.validate(req.body);
@@ -60,6 +49,8 @@ router.post("/", validateListing, async (req, res, next ) => { // async function
         //     throw new ExpressError(202, result.error);
         // }
         const newlisting = new Listing(req.body.listing);
+        // console.log(req.user);
+        newlisting.owner = req.user._id;
         await newlisting.save();
         req.flash("success", "New Listing Created!");
         res.redirect("/listings");
@@ -83,7 +74,7 @@ router.post("/", validateListing, async (req, res, next ) => { // async function
 // });
 
 //edit route 
-router.get("/:id/edit", async (req, res, next) => {
+router.get("/:id/edit", isLoggedIn, isOwner, async (req, res, next) => {
     try {
         let { id } = req.params;
         const listing = await Listing.findById(id);
@@ -99,9 +90,10 @@ router.get("/:id/edit", async (req, res, next) => {
 });
 
 //update route
-router.put("/:id", async (req, res, next) => {
+router.put("/:id", isLoggedIn, isOwner, async (req, res, next) => {
     try {
         let { id } = req.params;
+        
         await Listing.findByIdAndUpdate(id, { ...req.body.listing });
         req.flash("success", "Listing Updated !");
         res.redirect(`/listings/${id}`);
@@ -113,7 +105,7 @@ router.put("/:id", async (req, res, next) => {
 });
 
 // delete route
-router.delete("/:id", async (req, res, next) => {
+router.delete("/:id",isLoggedIn, isOwner, async (req, res, next) => {
     try {
         let { id } = req.params;
         const deletedListing = await Listing.findByIdAndDelete(id);
@@ -125,8 +117,6 @@ router.delete("/:id", async (req, res, next) => {
         next(err);
     }
 });
-
-
 
 
 module.exports = router;
