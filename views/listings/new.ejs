@@ -3,8 +3,8 @@
     <div class="col-8 offset-2">
         <br>
 <body>
-    <h3>Create a New List : </h3>
-    <form action="/listings" method="POST" novalidate class="needs-validation"> 
+    <h3> <b> Create a New Listing </b> </h3>
+    <form action="/listings" method="POST" novalidate class="needs-validation" enctype="multipart/form-data"> 
     <br>
         <div class="mb-3">
             <label for="title" class="form-label"> <b> Title </b> </label>
@@ -20,9 +20,16 @@
             <div class="invalid-feedback">Please enter your Description</div>
         </div>
 
-        <div class="mb-3">
+        <!-- <div class="mb-3">
             <label for="image" class="form-label"> <b>Image URL/Link </b></label>
             <input type="text"  name="listing[image]"  placeholder="Enter image/URL link" class="form-control" >
+            <div class="valid-feedback">it is Ok if you don't have pictures </div>
+        </div> -->
+
+        <div class="mb-3">
+            <label for="image" class="form-label"> <b>Upload Listing Image </b></label>
+            <input type="file"  name="listing[image]"   class="form-control" >
+
             <div class="valid-feedback">it is Ok if you don't have pictures </div>
         </div>
 

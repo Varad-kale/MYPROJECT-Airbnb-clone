@@ -3,7 +3,7 @@
     <div class="col-8 offset-2">
 <body>
     <h3>Edit your listing :</h3>
-    <form method="POST" action="/listings/<%= listing._id %>?_method=PUT" novalidate class="needs-validation">
+    <form method="POST" action="/listings/<%= listing._id %>?_method=PUT" novalidate class="needs-validation" enctype="multipart/form-data" >
         <div class="mb-3"> 
             <label for="title" class="form-label"><b>Title </b></label>
             <input type="text" name="listing[title]"  value="<%= listing.title %>" class="form-control" required>
@@ -16,11 +16,16 @@
             <textarea name="listing[description]"  class="form-control" required ><%= listing.description %></textarea>
             <div class="invalid-feedback">please enter your Description</div>
         </div>
+
+        <div class="mb-3">
+          <b> Original Listing Image </b> <br>
+            <img src="<%= originalImageUrl %>" alt="">
+        </div>
         
         <div class="mb-3">
-            <label for="image" class="form-label"> <b>Image Link</b></label>
-            <input type="text" r name="listing[image]"  value="<%= listing.image %>" class="form-control" required>
-            <div class="invalid-feedback">please enter your Image/Link </div>
+            <label for="image" class="form-label"> <b>Upload Image </b></label>
+            <input  name="listing[image]"  type="file"  class="form-control">
+            <!-- <div class="invalid-feedback">please enter your Image/Link </div> -->
         </div>
 
         <div class="row">
@@ -32,7 +37,7 @@
           
             <div class="mb-3 col-md-8">
                 <label for="country" class="form-label"><b>Country </b></label>
-                <input type="text" r name="listing[country]"  value="<%= listing.country %>" class="form-control" required>
+                <input type="text"  name="listing[country]"  value="<%= listing.country %>" class="form-control" required>
                 <div class="invalid-feedback">Country name should be Valid</div>
             </div>
         </div>
