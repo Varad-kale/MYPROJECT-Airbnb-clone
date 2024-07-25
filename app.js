@@ -11,11 +11,12 @@ const path = require("path");
 const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
 const session = require("express-session");
+const MongoStore = require("connect-mongo");
+
 const flash = require("connect-flash");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
 const User = require("./models/user.js");
-
 
 
 const listingRouter = require("./routes/listing.js");
@@ -29,8 +30,38 @@ app.use(methodOverride("_method"));
 app.engine('ejs', ejsMate);
 app.use(express.static(path.join(__dirname, "/public")));
 
+
+const dbUrl = process.env.ATLASDB_URL;
+
+
+async function main() {
+    await mongoose.connect(dbUrl);
+}
+
+main()
+    .then(() => {
+        console.log("connection successful to mongoDb");
+    }).catch((err) => {
+        console.log(err);
+    });
+
+
+const store  = MongoStore.create({
+    mongoUrl: dbUrl,
+    crypto: {
+        secret : process.env.SECRET,
+    },
+    touchAfter: 24 * 3600,
+});
+
+store.on("error", () => {
+    console.log("ERROR IN MONGO SESSION STORE", err);
+});
+
+
 const sessionOptions = {
-    secret: "mysupersecretcode",
+    store,
+    secret: process.env.SECRET,
     resave : false,
     saveUninitialized: true,
     cookie: {
@@ -40,10 +71,11 @@ const sessionOptions = {
     },
 };
 
-app.get("/", (req, res) => {
-    console.log("Started");
-    res.send("Escape to this luxurious villa nestled in the serene countryside, offering breathtaking views of the surrounding mountains and lush greenery. This spacious property boasts a private pool, outdoor dining area, and beautifully landscaped gardens, perfect for enjoying the Mediterranean sunshine. Inside, you'll find elegantly decorated rooms with modern amenities and comfortable furnishings. Ideal for a relaxing getaway with family and friends, this villa is the perfect retreat for those looking to unwind and recharge");
-});
+
+// app.get("/", (req, res) => {
+//     console.log("Started");
+//     res.send("Escape to this luxurious villa nestled in the serene countryside, offering breathtaking views of the surrounding mountains and lush greenery. This spacious property boasts a private pool, outdoor dining area, and beautifully landscaped gardens, perfect for enjoying the Mediterranean sunshine. Inside, you'll find elegantly decorated rooms with modern amenities and comfortable furnishings. Ideal for a relaxing getaway with family and friends, this villa is the perfect retreat for those looking to unwind and recharge");
+// });
 
 
 app.use(session(sessionOptions));
@@ -81,18 +113,7 @@ app.use("/listings/:id/reviews", reviewRouter );
 app.use("/", userRouter);
 
 
-const MONGO_URL = "mongodb://127.0.0.1:27017/WanderGo";
-
-async function main() {
-    await mongoose.connect(MONGO_URL);
-}
-
-main()
-    .then(() => {
-        console.log("connection successful to mongoDb");
-    }).catch((err) => {
-        console.log(err);
-    });
+// const MONGO_URL = "mongodb://127.0.0.1:27017/WanderGo";
 
 
 // app.get("/testlisting", async (req,res) => {

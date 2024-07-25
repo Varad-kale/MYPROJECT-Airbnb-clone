@@ -1,19 +1,9 @@
-<script>
-    // TO MAKE THE MAP APPEAR YOU MUST
-     // ADD YOUR ACCESS TOKEN FROM
-     // https://account.mapbox.com
-     let mapToken = "<%= process.env.MAP_TOKEN %>";
-     console.log(mapToken);
-     mapboxgl.accessToken = mapToken ;
- 
-     const map = new mapboxgl.Map({
-         container: 'map', // container ID
-         style: "mapbox://styles/mapbox/streets-v12",
-         center: [-74.5, 40], // starting position [lng, lat]. Note that lat must be set between -90 and 90
-         zoom: 9 // starting zoom
-     });
- </script>
 <% layout('/layouts/boilerplate') -%>
+<script>
+    const mapToken = "<%= process.env.MAP_TOKEN %>";
+    const coordinates = <%- JSON.stringify(listing.geometry.coordinates) %>;
+    
+</script>
 <div class="row">
     <div class="col-8 offset-3 mt-3">
 <body>
@@ -111,8 +101,12 @@
     </div>
     <div class="col-6 offset-3 mb-3">
         <h3>Where you'll be</h3>
-        <div id="map"></div>
+        <div id="map" style="height: 400px ;width: 100vh;">
+        
+        </div>
     </div>
+   
+
     
     <!-- <script src="/js/script.js"></script> -->
 </body>
@@ -128,7 +122,8 @@
     const map = new mapboxgl.Map({
         container: 'map', // container ID
         style: "mapbox://styles/mapbox/streets-v12",
-        center: [-74.5, 40], // starting position [lng, lat]. Note that lat must be set between -90 and 90
+        center: [ 73.8567 , 18.5204 ], // starting position [lng, lat]. Note that lat must be set between -90 and 90
         zoom: 9 // starting zoom
     });
 </script> -->
+<script src="/js/map.js"></script>
